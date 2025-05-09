@@ -8,14 +8,16 @@
 </head>
 <body>
 <div id="layout">
-  <button id="toggle-history" onclick="toggleHistory()">📂 菜单</button>
-  <div id="history">
-    <button onclick="createNewChat()">+ 新对话</button>
-    <button onclick="clearAllChats()">🗑 清空历史</button>
-    <button onclick="exportCurrentChat()">📁 导出当前对话</button>
-    <button onclick="toggleDarkMode()">🌓 夜间模式</button>
-    <input type="text" id="search-box" placeholder="搜索消息..." oninput="searchMessages()" style="margin-top: 10px; width: 100%; padding: 5px; font-size: 14px;" />
-    <div id="history-list"></div>
+  <div id="menu-bubble">
+    <button id="toggle-history" onclick="toggleHistory()">📂</button>
+    <div id="history" class="bubble">
+      <button onclick="createNewChat()">+ 新对话</button>
+      <button onclick="clearAllChats()">🗑 清空历史</button>
+      <button onclick="exportCurrentChat()">📁 导出当前对话</button>
+      <button onclick="toggleDarkMode()">🌓 夜间模式</button>
+      <input type="text" id="search-box" placeholder="搜索消息..." oninput="searchMessages()" style="margin-top: 10px; width: 100%; padding: 5px; font-size: 14px;" />
+      <div id="history-list"></div>
+    </div>
   </div>
   <div id="main">
     <div id="chat"></div>
