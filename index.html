@@ -9,24 +9,6 @@
       background: #f8f9fa;
       margin: 0;
     }
-
-    #top-bar {
-      position: sticky;
-      top: 0;
-      background: white;
-      padding: 16px 20px;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-      z-index: 10;
-    }
-
-    #model-select {
-      padding: 10px 16px;
-      font-size: 18px;
-      border-radius: 6px;
-      min-width: 300px;
-      max-width: 100%;
-    }
-
     #chat {
       max-width: 800px;
       margin: 20px auto;
@@ -37,51 +19,46 @@
       overflow-y: auto;
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     }
-
     .message {
       margin-bottom: 12px;
       padding: 10px;
       border-radius: 6px;
       white-space: pre-wrap;
     }
-
     .user { background-color: #d0ebff; }
     .assistant { background-color: #f1f3f5; }
-
     #input-container {
       max-width: 800px;
       margin: 0 auto;
       display: flex;
       padding: 20px;
       gap: 10px;
+      flex-wrap: wrap;
     }
-
     textarea {
-      flex: 1;
+      flex: 1 1 60%;
       padding: 10px;
       font-size: 16px;
       border-radius: 4px;
     }
-
     button {
       padding: 10px 16px;
       font-size: 16px;
+    }
+    select {
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 4px;
+      flex: 1 1 30%;
     }
   </style>
 </head>
 <body>
 
-<!-- 顶部模型选择框 -->
-<div id="top-bar">
-  模型选择：
-  <select id="model-select"></select>
-</div>
-
-<!-- 聊天框 -->
 <div id="chat"></div>
 
-<!-- 输入框 -->
 <div id="input-container">
+  <select id="model-select"></select> <!-- 模型选择框 -->
   <textarea id="user-input" rows="2" placeholder="输入你的问题..."></textarea>
   <button onclick="sendMessage()">发送</button>
 </div>
@@ -105,25 +82,31 @@
     try {
       const res = await fetch('https://openrouter.ai/api/v1/models');
       const data = await res.json();
-      data.forEach(model => {
+      const models = data.data || [];
+      models.forEach(m => {
         const option = document.createElement('option');
-        option.value = model.id;
-        option.textContent = model.id;
+        option.value = m.id;
+        option.textContent = m.id;
         modelSelect.appendChild(option);
       });
+      // 默认选中某个模型
+      modelSelect.value = 'deepseek/deepseek-r1:free';
     } catch (err) {
-      console.error('加载模型失败', err);
+      console.error('模型加载失败', err);
+      const option = document.createElement('option');
+      option.value = 'deepseek/deepseek-r1:free';
+      option.textContent = 'deepseek/deepseek-r1:free';
+      modelSelect.appendChild(option);
     }
   }
 
   async function sendMessage() {
     const content = inputBox.value.trim();
+    const selectedModel = modelSelect.value;
     if (!content) return;
     appendMessage('user', content);
     messages.push({ role: 'user', content: content });
     inputBox.value = '';
-
-    const selectedModel = modelSelect.value;
 
     try {
       const res = await fetch(apiUrl, {
@@ -144,7 +127,8 @@
     }
   }
 
-  loadModels(); // 页面加载时加载模型
+  // 初始化加载模型列表
+  loadModels();
 </script>
 
 </body>
