@@ -8,6 +8,7 @@
 </head>
 <body>
 <div id="layout">
+  <button id="toggle-history" onclick="toggleHistory()">📂 菜单</button>
   <div id="history">
     <button onclick="createNewChat()">+ 新对话</button>
     <button onclick="clearAllChats()">🗑 清空历史</button>
@@ -26,6 +27,11 @@
   </div>
 </div>
 
+<script>
+function toggleHistory() {
+  document.getElementById('history').classList.toggle('show');
+}
+</script>
 <script src="script.js"></script>
 </body>
 </html>
