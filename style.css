@@ -181,7 +181,7 @@ body.dark .assistant {
   }
 
   #history {
-    position: absolute;
+    position: fixed;
     top: 50px;
     left: 10px;
     width: calc(100% - 20px);
@@ -245,7 +245,7 @@ body.dark .assistant {
   }
 
   #history {
-    position: absolute;
+    position: fixed;
     top: 50px;
     left: 10px;
     width: calc(100% - 20px);
