@@ -20,11 +20,13 @@
     </div>
   </div>
   <div id="main">
-    <div id="chat"></div>
+    <div id="chat" style="margin-top: 60px;"></div>
     <div id="input-container">
       <select id="model-select"></select>
       <textarea id="user-input" rows="2" placeholder="输入你的问题..."></textarea>
-      <button onclick="sendMessage()">发送</button>
+      <div style="width: 100%; display: flex; justify-content: flex-end;">
+        <button onclick="sendMessage()">发送</button>
+      </div>
     </div>
   </div>
 </div>
@@ -33,6 +35,15 @@
 function toggleHistory() {
   document.getElementById('history').classList.toggle('show');
 }
+
+// 自动关闭菜单气泡（点击外部）
+document.addEventListener('click', function (e) {
+  const history = document.getElementById('history');
+  const toggle = document.getElementById('toggle-history');
+  if (!history.contains(e.target) && !toggle.contains(e.target)) {
+    history.classList.remove('show');
+  }
+});
 </script>
 <script src="script.js"></script>
 </body>
