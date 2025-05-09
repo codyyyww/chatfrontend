@@ -1,0 +1,80 @@
+body {
+  font-family: sans-serif;
+  background: #f8f9fa;
+  margin: 0;
+}
+
+#chat {
+  max-width: 800px;
+  margin: 20px auto;
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  height: 70vh;
+  overflow-y: auto;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.message {
+  margin-bottom: 12px;
+  padding: 10px;
+  border-radius: 6px;
+  white-space: pre-wrap;
+}
+
+.user {
+  background-color: #d0ebff;
+}
+
+.assistant {
+  background-color: #f1f3f5;
+}
+
+#input-container {
+  max-width: 800px;
+  margin: 0 auto;
+  display: flex;
+  padding: 20px;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+textarea {
+  flex: 1 1 60%;
+  padding: 10px;
+  font-size: 16px;
+  border-radius: 4px;
+  resize: vertical;
+  min-height: 60px;
+}
+
+button {
+  padding: 10px 16px;
+  font-size: 16px;
+  flex: 1 1 100px;
+}
+
+select {
+  padding: 10px;
+  font-size: 16px;
+  border-radius: 4px;
+  flex: 1 1 30%;
+}
+
+@media (max-width: 600px) {
+  #input-container {
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px;
+  }
+
+  textarea, select, button {
+    flex: 1 1 100%;
+    font-size: 16px;
+  }
+
+  #chat {
+    height: 60vh;
+    padding: 15px;
+  }
+}
