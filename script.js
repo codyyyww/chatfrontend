@@ -2,7 +2,11 @@ const apiUrl = 'https://api-proxy-pbgb.onrender.com/api/chat';
 const chatBox = document.getElementById('chat');
 const inputBox = document.getElementById('user-input');
 const modelSelect = document.getElementById('model-select');
+const searchBox = document.getElementById('search-box');
+
 let messages = [];
+let allChats = JSON.parse(localStorage.getItem('chat-history')) || {};
+let currentChatId = null;
 
 function appendMessage(role, content) {
   const msg = document.createElement('div');
@@ -10,6 +14,90 @@ function appendMessage(role, content) {
   msg.textContent = (role === 'user' ? '🧑：' : '🤖：') + content;
   chatBox.appendChild(msg);
   chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+function saveHistory() {
+  if (currentChatId) {
+    allChats[currentChatId] = [...messages];
+    localStorage.setItem('chat-history', JSON.stringify(allChats));
+  }
+}
+
+function createNewChat() {
+  currentChatId = 'chat-' + Date.now();
+  allChats[currentChatId] = [];
+  messages = [];
+  chatBox.innerHTML = '';
+  updateHistoryList();
+  saveHistory();
+}
+
+function updateHistoryList() {
+  const list = document.getElementById('history-list');
+  list.innerHTML = '';
+  for (const id in allChats) {
+    const btn = document.createElement('button');
+    btn.textContent = `对话 ${id.slice(-5)}`;
+    btn.onclick = () => loadChat(id);
+    list.appendChild(btn);
+  }
+}
+
+function loadChat(id) {
+  currentChatId = id;
+  messages = [...allChats[id]];
+  chatBox.innerHTML = '';
+  messages.forEach(m => appendMessage(m.role, m.content));
+}
+
+function clearAllChats() {
+  if (confirm('确定要清空所有历史记录吗？')) {
+    localStorage.removeItem('chat-history');
+    allChats = {};
+    messages = [];
+    currentChatId = null;
+    chatBox.innerHTML = '';
+    updateHistoryList();
+    createNewChat();
+  }
+}
+
+function exportCurrentChat() {
+  if (!currentChatId || messages.length === 0) {
+    alert('当前对话为空，无法导出。');
+    return;
+  }
+  let text = messages.map(m => `${m.role === 'user' ? '🧑' : '🤖'}: ${m.content}`).join('\n\n');
+  const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = `${currentChatId}.txt`;
+  link.click();
+}
+
+function toggleDarkMode() {
+  document.body.classList.toggle('dark');
+  localStorage.setItem('dark-mode', document.body.classList.contains('dark') ? 'on' : 'off');
+}
+
+function searchMessages() {
+  const keyword = searchBox.value.trim().toLowerCase();
+  chatBox.innerHTML = '';
+
+  if (!keyword) {
+    messages.forEach(m => appendMessage(m.role, m.content));
+    return;
+  }
+
+  const filtered = messages.filter(m => m.content.toLowerCase().includes(keyword));
+  if (filtered.length === 0) {
+    const msg = document.createElement('div');
+    msg.textContent = '未找到匹配内容。';
+    msg.style.color = 'gray';
+    chatBox.appendChild(msg);
+  } else {
+    filtered.forEach(m => appendMessage(m.role, m.content));
+  }
 }
 
 async function loadModels() {
@@ -25,7 +113,6 @@ async function loadModels() {
     });
     modelSelect.value = 'deepseek/deepseek-r1:free';
   } catch (err) {
-    console.error('模型加载失败', err);
     const option = document.createElement('option');
     option.value = 'deepseek/deepseek-r1:free';
     option.textContent = 'deepseek/deepseek-r1:free';
@@ -37,58 +124,39 @@ async function sendMessage() {
   const content = inputBox.value.trim();
   const selectedModel = modelSelect.value;
   if (!content) return;
+
   appendMessage('user', content);
   messages.push({ role: 'user', content: content });
   inputBox.value = '';
+  saveHistory();
 
   try {
     const res = await fetch(apiUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model: selectedModel, messages: messages })
+      body: JSON.stringify({ model: selectedModel, messages })
     });
     const data = await res.json();
     const reply = data.choices?.[0]?.message?.content || '[无回复]';
     appendMessage('assistant', reply);
     messages.push({ role: 'assistant', content: reply });
+    saveHistory();
   } catch (err) {
     appendMessage('assistant', '[发生错误]');
     console.error(err);
   }
 }
 
-function startNewChat() {
-  if (confirm("确定要开始新对话吗？这将清除当前聊天记录。")) {
-    messages = [];
-    chatBox.innerHTML = '';
-  }
+// 初始化页面
+loadModels();
+updateHistoryList();
+if (Object.keys(allChats).length > 0) {
+  loadChat(Object.keys(allChats)[0]);
+} else {
+  createNewChat();
 }
 
-function saveChatHistory() {
-  if (messages.length === 0) {
-    alert("没有聊天记录可保存。");
-    return;
-  }
-  const history = JSON.stringify(messages, null, 2);
-  const blob = new Blob([history], { type: "application/json" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "chat-history.json";
-  a.click();
-  URL.revokeObjectURL(url);
+// 自动启用夜间模式
+if (localStorage.getItem('dark-mode') === 'on') {
+  document.body.classList.add('dark');
 }
-
-window.onload = () => {
-  loadModels();
-
-  const saved = localStorage.getItem('chatHistory');
-  if (saved) {
-    messages = JSON.parse(saved);
-    messages.forEach(msg => appendMessage(msg.role, msg.content));
-  }
-};
-
-window.onbeforeunload = () => {
-  localStorage.setItem('chatHistory', JSON.stringify(messages));
-};
