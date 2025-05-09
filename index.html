@@ -4,84 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DeepSeek Chat</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      background: #f8f9fa;
-      margin: 0;
-    }
-
-    #chat {
-      max-width: 800px;
-      margin: 20px auto;
-      background: white;
-      border-radius: 8px;
-      padding: 20px;
-      height: 70vh;
-      overflow-y: auto;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    }
-
-    .message {
-      margin-bottom: 12px;
-      padding: 10px;
-      border-radius: 6px;
-      white-space: pre-wrap;
-    }
-
-    .user { background-color: #d0ebff; }
-    .assistant { background-color: #f1f3f5; }
-
-    #input-container {
-      max-width: 800px;
-      margin: 0 auto;
-      display: flex;
-      padding: 20px;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    textarea {
-      flex: 1 1 60%;
-      padding: 10px;
-      font-size: 16px;
-      border-radius: 4px;
-      resize: vertical;
-      min-height: 60px;
-    }
-
-    button {
-      padding: 10px 16px;
-      font-size: 16px;
-      flex: 1 1 100px;
-    }
-
-    select {
-      padding: 10px;
-      font-size: 16px;
-      border-radius: 4px;
-      flex: 1 1 30%;
-    }
-
-    /* 响应式样式 */
-    @media (max-width: 600px) {
-      #input-container {
-        flex-direction: column;
-        gap: 10px;
-        padding: 10px;
-      }
-
-      textarea, select, button {
-        flex: 1 1 100%;
-        font-size: 16px;
-      }
-
-      #chat {
-        height: 60vh;
-        padding: 15px;
-      }
-    }
-  </style>
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
 
@@ -91,73 +14,10 @@
   <select id="model-select"></select>
   <textarea id="user-input" rows="2" placeholder="输入你的问题..."></textarea>
   <button onclick="sendMessage()">发送</button>
+  <button onclick="startNewChat()">新建对话</button>
+  <button onclick="saveChatHistory()">保存历史</button>
 </div>
 
-<script>
-  const apiUrl = 'https://api-proxy-pbgb.onrender.com/api/chat';
-  const chatBox = document.getElementById('chat');
-  const inputBox = document.getElementById('user-input');
-  const modelSelect = document.getElementById('model-select');
-  let messages = [];
-
-  function appendMessage(role, content) {
-    const msg = document.createElement('div');
-    msg.className = 'message ' + role;
-    msg.textContent = (role === 'user' ? '🧑：' : '🤖：') + content;
-    chatBox.appendChild(msg);
-    chatBox.scrollTop = chatBox.scrollHeight;
-  }
-
-  async function loadModels() {
-    try {
-      const res = await fetch('https://openrouter.ai/api/v1/models');
-      const data = await res.json();
-      const models = data.data || [];
-      models.forEach(m => {
-        const option = document.createElement('option');
-        option.value = m.id;
-        option.textContent = m.id;
-        modelSelect.appendChild(option);
-      });
-      modelSelect.value = 'deepseek/deepseek-r1:free';
-    } catch (err) {
-      console.error('模型加载失败', err);
-      const option = document.createElement('option');
-      option.value = 'deepseek/deepseek-r1:free';
-      option.textContent = 'deepseek/deepseek-r1:free';
-      modelSelect.appendChild(option);
-    }
-  }
-
-  async function sendMessage() {
-    const content = inputBox.value.trim();
-    const selectedModel = modelSelect.value;
-    if (!content) return;
-    appendMessage('user', content);
-    messages.push({ role: 'user', content: content });
-    inputBox.value = '';
-
-    try {
-      const res = await fetch(apiUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: selectedModel,
-          messages: messages
-        })
-      });
-      const data = await res.json();
-      const reply = data.choices?.[0]?.message?.content || '[无回复]';
-      appendMessage('assistant', reply);
-      messages.push({ role: 'assistant', content: reply });
-    } catch (err) {
-      appendMessage('assistant', '[发生错误]');
-      console.error(err);
-    }
-  }
-
-  loadModels();
-</script>
-
+<script src="script.js"></script>
 </body>
 </html>
