@@ -11,7 +11,13 @@ let currentChatId = null;
 function appendMessage(role, content) {
   const msg = document.createElement('div');
   msg.className = 'message ' + role;
-  msg.textContent = role === 'user' ? content + ': 🧑' : '🤖：' + content;
+  if (role === 'user') {
+  msg.textContent = content;
+  msg.classList.add('user');
+} else {
+  msg.textContent = content;
+  msg.classList.add('assistant');
+}
   chatBox.appendChild(msg);
   chatBox.scrollTop = chatBox.scrollHeight;
 }
