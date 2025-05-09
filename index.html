@@ -3,19 +3,27 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>DeepSeek Chat</title>
-  <link rel="stylesheet" href="styles.css" />
+  <title>Chat with History</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-
-<div id="chat"></div>
-
-<div id="input-container">
-  <select id="model-select"></select>
-  <textarea id="user-input" rows="2" placeholder="输入你的问题..."></textarea>
-  <button onclick="sendMessage()">发送</button>
-  <button onclick="startNewChat()">新建对话</button>
-  <button onclick="saveChatHistory()">保存历史</button>
+<div id="layout">
+  <div id="history">
+    <button onclick="createNewChat()">+ 新对话</button>
+    <button onclick="clearAllChats()">🗑 清空历史</button>
+    <button onclick="exportCurrentChat()">📁 导出当前对话</button>
+    <button onclick="toggleDarkMode()">🌓 夜间模式</button>
+    <input type="text" id="search-box" placeholder="搜索消息..." oninput="searchMessages()" style="margin-top: 10px; width: 100%; padding: 5px; font-size: 14px;" />
+    <div id="history-list"></div>
+  </div>
+  <div id="main">
+    <div id="chat"></div>
+    <div id="input-container">
+      <select id="model-select"></select>
+      <textarea id="user-input" rows="2" placeholder="输入你的问题..."></textarea>
+      <button onclick="sendMessage()">发送</button>
+    </div>
+  </div>
 </div>
 
 <script src="script.js"></script>
