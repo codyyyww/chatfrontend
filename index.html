@@ -1,89 +1,126 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-  <meta charset="UTF-8">
-  <title>OpenRouter AI Chat</title>
+  <meta charset="UTF-8" />
+  <title>DeepSeek Chat</title>
   <style>
-    body { font-family: Arial; background: #f4f4f4; padding: 20px; }
-    #chat { max-width: 800px; margin: auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px #ccc; }
-    .msg { margin: 10px 0; }
-    .user { color: blue; font-weight: bold; }
-    .bot { color: green; font-weight: bold; }
-    textarea { width: 100%; height: 80px; }
-    select, button { margin-top: 10px; padding: 8px; font-size: 16px; }
+    body {
+      font-family: sans-serif;
+      background: #f8f9fa;
+      margin: 0;
+    }
+    #chat {
+      max-width: 800px;
+      margin: 20px auto;
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      height: 80vh;
+      overflow-y: auto;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    .message {
+      margin-bottom: 12px;
+      padding: 10px;
+      border-radius: 6px;
+      white-space: pre-wrap;
+    }
+    .user { background-color: #d0ebff; }
+    .assistant { background-color: #f1f3f5; }
+    #input-container {
+      max-width: 800px;
+      margin: 0 auto;
+      display: flex;
+      padding: 20px;
+      gap: 10px;
+    }
+    textarea {
+      flex: 1;
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 4px;
+    }
+    button {
+      padding: 10px 16px;
+      font-size: 16px;
+    }
+    select {
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 4px;
+    }
   </style>
 </head>
 <body>
-  <div id="chat">
-    <h2>AI 聊天</h2>
-    <label for="model">选择模型：</label>
-    <select id="model"><option>加载中...</option></select>
 
-    <div id="messages"></div>
+<div id="chat"></div>
 
-    <textarea id="input" placeholder="请输入您的问题..."></textarea><br>
-    <button onclick="sendMessage()">发送</button>
-  </div>
+<div id="input-container">
+  <select id="model-select"></select>
+  <textarea id="user-input" rows="2" placeholder="输入你的问题..."></textarea>
+  <button onclick="sendMessage()">发送</button>
+</div>
 
-  <script>
-    const apiUrl = "https://api-proxy-pbgb.onrender.com"; // 替换为你的 Render 地址
-    const modelSelect = document.getElementById("model");
-    const messages = [];
+<script>
+  const apiUrl = 'https://api-proxy-pbgb.onrender.com/api/chat';
+  const chatBox = document.getElementById('chat');
+  const inputBox = document.getElementById('user-input');
+  const modelSelect = document.getElementById('model-select');
+  let messages = [];
 
-    // 获取模型列表
-    async function loadModels() {
-      try {
-        const res = await fetch("https://openrouter.ai/api/v1/models");
-        const data = await res.json();
-        modelSelect.innerHTML = "";
-        data.data.forEach(model => {
-          const option = document.createElement("option");
-          option.value = model.id;
-          option.textContent = model.id;
-          modelSelect.appendChild(option);
-        });
-      } catch (err) {
-        console.error("模型加载失败", err);
-        modelSelect.innerHTML = "<option>模型加载失败</option>";
-      }
-    }
+  function appendMessage(role, content) {
+    const msg = document.createElement('div');
+    msg.className = 'message ' + role;
+    msg.textContent = (role === 'user' ? '🧑：' : '🤖：') + content;
+    chatBox.appendChild(msg);
+    chatBox.scrollTop = chatBox.scrollHeight;
+  }
 
-    async function sendMessage() {
-      const input = document.getElementById("input");
-      const model = modelSelect.value;
-      const userMsg = input.value.trim();
-      if (!userMsg) return;
-
-      messages.push({ role: "user", content: userMsg });
-      renderMessages();
-      input.value = "";
-
-      const res = await fetch(apiUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ model, messages })
-      });
-
+  async function loadModels() {
+    try {
+      const res = await fetch('https://openrouter.ai/api/v1/models');
       const data = await res.json();
-      if (data.choices && data.choices[0]) {
-        messages.push({ role: "assistant", content: data.choices[0].message.content });
-      } else {
-        messages.push({ role: "assistant", content: "[发生错误]" });
-        console.error(data);
-      }
-      renderMessages();
+      data.forEach(model => {
+        const option = document.createElement('option');
+        option.value = model.id;
+        option.textContent = model.id;
+        modelSelect.appendChild(option);
+      });
+    } catch (err) {
+      console.error('加载模型失败', err);
     }
+  }
 
-    function renderMessages() {
-      const msgDiv = document.getElementById("messages");
-      msgDiv.innerHTML = messages.map(m => {
-        const cls = m.role === "user" ? "user" : "bot";
-        const who = cls === "user" ? "你" : "AI";
-        return `<div class="msg"><span class="${cls}">${who}:</span> ${m.content}</div>`;
-      }).join("");
+  async function sendMessage() {
+    const content = inputBox.value.trim();
+    if (!content) return;
+    appendMessage('user', content);
+    messages.push({ role: 'user', content: content });
+    inputBox.value = '';
+
+    const selectedModel = modelSelect.value;
+
+    try {
+      const res = await fetch(apiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: selectedModel,
+          messages: messages
+        })
+      });
+      const data = await res.json();
+      const reply = data.choices?.[0]?.message?.content || '[无回复]';
+      appendMessage('assistant', reply);
+      messages.push({ role: 'assistant', content: reply });
+    } catch (err) {
+      appendMessage('assistant', '[发生错误]');
+      console.error(err);
     }
+  }
 
-    loadModels(); // 页面加载时自动调用
-  </script>
+  loadModels(); // 页面加载时加载模型
+</script>
+
 </body>
 </html>
