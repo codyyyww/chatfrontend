@@ -11,6 +11,8 @@
   <div id="menu-bubble">
     <button id="toggle-history" onclick="toggleHistory()">📂</button>
     <div id="history" class="bubble">
+      <label style="font-size: 14px;">选择模型：</label>
+      <select id="model-select" style="width: 100%; margin-bottom: 10px;"></select>
       <button onclick="createNewChat()">+ 新对话</button>
       <button onclick="clearAllChats()">🗑 清空历史</button>
       <button onclick="exportCurrentChat()">📁 导出当前对话</button>
@@ -22,8 +24,8 @@
   <div id="main">
     <div id="chat" style="margin-top: 60px;"></div>
     <div id="input-container">
-  <select id="model-select"></select>
   <textarea id="user-input" rows="2" placeholder="输入你的问题..."></textarea>
+  
 </div>
     </div>
   </div>
