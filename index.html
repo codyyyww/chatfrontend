@@ -2,6 +2,7 @@
 <html lang="zh">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DeepSeek Chat</title>
   <style>
     body {
@@ -9,6 +10,7 @@
       background: #f8f9fa;
       margin: 0;
     }
+
     #chat {
       max-width: 800px;
       margin: 20px auto;
@@ -19,14 +21,17 @@
       overflow-y: auto;
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     }
+
     .message {
       margin-bottom: 12px;
       padding: 10px;
       border-radius: 6px;
       white-space: pre-wrap;
     }
+
     .user { background-color: #d0ebff; }
     .assistant { background-color: #f1f3f5; }
+
     #input-container {
       max-width: 800px;
       margin: 0 auto;
@@ -35,21 +40,46 @@
       gap: 10px;
       flex-wrap: wrap;
     }
+
     textarea {
       flex: 1 1 60%;
       padding: 10px;
       font-size: 16px;
       border-radius: 4px;
+      resize: vertical;
+      min-height: 60px;
     }
+
     button {
       padding: 10px 16px;
       font-size: 16px;
+      flex: 1 1 100px;
     }
+
     select {
       padding: 10px;
       font-size: 16px;
       border-radius: 4px;
       flex: 1 1 30%;
+    }
+
+    /* 响应式样式 */
+    @media (max-width: 600px) {
+      #input-container {
+        flex-direction: column;
+        gap: 10px;
+        padding: 10px;
+      }
+
+      textarea, select, button {
+        flex: 1 1 100%;
+        font-size: 16px;
+      }
+
+      #chat {
+        height: 60vh;
+        padding: 15px;
+      }
     }
   </style>
 </head>
@@ -58,7 +88,7 @@
 <div id="chat"></div>
 
 <div id="input-container">
-  <select id="model-select"></select> <!-- 模型选择框 -->
+  <select id="model-select"></select>
   <textarea id="user-input" rows="2" placeholder="输入你的问题..."></textarea>
   <button onclick="sendMessage()">发送</button>
 </div>
@@ -89,7 +119,6 @@
         option.textContent = m.id;
         modelSelect.appendChild(option);
       });
-      // 默认选中某个模型
       modelSelect.value = 'deepseek/deepseek-r1:free';
     } catch (err) {
       console.error('模型加载失败', err);
@@ -127,7 +156,6 @@
     }
   }
 
-  // 初始化加载模型列表
   loadModels();
 </script>
 
