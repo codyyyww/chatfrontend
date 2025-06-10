@@ -67,18 +67,18 @@ function toggleHistoryPanel() {
 
 function initialHistoryPanelState() {
     if (!historyPanel || !toggleHistoryBtn) return;
-    if (window.innerWidth > 768) {
+    if (window.innerWidth > 768) { // Desktop
         if (!historyPanel.classList.contains('show')) {
-            historyPanel.classList.add('show');
+            historyPanel.classList.add('show'); // Show panel on desktop
             toggleHistoryBtn.setAttribute('aria-expanded', 'true');
         }
-        toggleHistoryBtn.style.display = 'none'; // Hide on desktop
-    } else {
-        if (historyPanel.classList.contains('show')) {
+        toggleHistoryBtn.style.display = 'none'; // Hide toggle button on desktop
+    } else { // Mobile
+        if (historyPanel.classList.contains('show')) { // If somehow shown by default on mobile, hide it
             historyPanel.classList.remove('show');
             toggleHistoryBtn.setAttribute('aria-expanded', 'false');
         }
-        toggleHistoryBtn.style.display = 'block'; // Show on mobile
+        toggleHistoryBtn.style.display = 'block'; // Show toggle button on mobile
     }
 }
 
@@ -86,7 +86,7 @@ function initialHistoryPanelState() {
 function appendMessage(role, content) {
   const msg = document.createElement('div');
   msg.className = `message ${role}`;
-  msg.textContent = content; // For basic text; consider Markdown rendering library for complex content
+  msg.textContent = content;
   chatBox.appendChild(msg);
   chatBox.scrollTop = chatBox.scrollHeight;
   return msg;
@@ -94,15 +94,15 @@ function appendMessage(role, content) {
 
 function saveHistory() {
   if (currentChatId) {
-    allChats[currentChatId] = [...messages]; // Save a copy
+    allChats[currentChatId] = [...messages];
     localStorage.setItem('chat-history', JSON.stringify(allChats));
   }
 }
 
 function createNewChat() {
   const newId = 'chat-' + Date.now();
-  allChats[newId] = []; // Initialize with empty messages
-  loadChat(newId); // This will also call updateHistoryList
+  allChats[newId] = [];
+  loadChat(newId);
 }
 
 function updateHistoryList() {
@@ -111,7 +111,7 @@ function updateHistoryList() {
   const sortedChatIds = Object.keys(allChats).sort((a, b) => {
     const timeA = parseInt(a.split('-')[1] || '0');
     const timeB = parseInt(b.split('-')[1] || '0');
-    return timeB - timeA; // Newest first
+    return timeB - timeA;
   });
 
   for (const id of sortedChatIds) {
@@ -123,13 +123,12 @@ function updateHistoryList() {
         if (firstUserMessage?.content) {
             chatTitle = firstUserMessage.content.substring(0, 25) + (firstUserMessage.content.length > 25 ? '...' : '');
         } else if (chatMessages[0]?.content) {
-            // Fallback to first message if no user message found (e.g., assistant-only start)
             chatTitle = chatMessages[0].content.substring(0, 25) + (chatMessages[0].content.length > 25 ? '...' : '');
         }
     }
     btn.textContent = chatTitle;
     btn.title = `加载对话 ${id}`;
-    btn.onclick = () => loadChat(id); // Using onclick directly here for simplicity, could also use addEventListener
+    btn.onclick = () => loadChat(id);
     if (id === currentChatId) {
         btn.classList.add('active-chat');
     }
@@ -138,17 +137,16 @@ function updateHistoryList() {
 }
 
 function loadChat(id) {
-  if (!allChats[id]) { // Should not happen if createNewChat initializes
-      console.warn(`Attempted to load non-existent chat: ${id}. Creating new one as fallback.`);
+  if (!allChats[id]) {
       allChats[id] = [];
   }
   currentChatId = id;
-  messages = [...allChats[id]]; // Load a copy
+  messages = [...allChats[id]];
   chatBox.innerHTML = '';
   messages.forEach(m => appendMessage(m.role, m.content));
   
-  if (searchBox) searchBox.value = ''; // Clear search on chat load
-  updateHistoryList(); // Re-render to set active class
+  if (searchBox) searchBox.value = '';
+  updateHistoryList();
 }
 
 function clearAllChats() {
@@ -158,7 +156,7 @@ function clearAllChats() {
     messages = [];
     currentChatId = null;
     chatBox.innerHTML = '';
-    createNewChat(); // Start a fresh new chat and update list
+    createNewChat();
   }
 }
 
@@ -175,7 +173,7 @@ function exportCurrentChat() {
   link.href = URL.createObjectURL(blob);
   link.download = `chat-${currentChatId.slice(-5)}-${new Date().toISOString().split('T')[0]}.txt`;
   link.click();
-  URL.revokeObjectURL(link.href); // Clean up
+  URL.revokeObjectURL(link.href);
 }
 
 function toggleDarkMode() {
@@ -219,7 +217,7 @@ async function loadModels() {
   modelSelect.innerHTML = ''; 
 
   try {
-    const res = await fetch('https://openrouter.ai/api/v1/models'); // Direct call
+    const res = await fetch('https://openrouter.ai/api/v1/models');
     if (res.ok) {
         const data = await res.json();
         const models = (data.data || [])
@@ -235,7 +233,7 @@ async function loadModels() {
         if (preferredOption) {
             modelSelect.value = preferredModelId;
         } else if (models.length > 0) {
-            modelSelect.value = models[0].id; // Fallback to first in sorted list
+            modelSelect.value = models[0].id;
         }
     } else {
         throw new Error(`Failed to fetch models: ${res.status}`);
@@ -255,7 +253,6 @@ async function loadModels() {
         modelSelect.value = defaultModels[0].id;
     }
   }
-  // Ensure a model is selected if options are available
   if (!modelSelect.value && modelSelect.options.length > 0) {
       modelSelect.value = modelSelect.options[0].value;
   }
@@ -285,7 +282,7 @@ async function sendMessage() {
   }
 
   if (!currentChatId) {
-    createNewChat(); // Ensure currentChatId is set
+    createNewChat();
   }
 
   appendMessage('user', content);
@@ -294,122 +291,108 @@ async function sendMessage() {
   inputBox.focus();
   if (sendButton) sendButton.disabled = true;
 
-  const assistantMsgElement = appendMessage('assistant', '...'); // Placeholder
+  const assistantMsgElement = appendMessage('assistant', '...');
   let fullAssistantReply = '';
 
   try {
-    const apiMessages = [...messages]; // Use a copy of current messages for the API call
+    const apiMessages = [...messages];
 
     const response = await fetch(apiUrl, {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json',
-        'X-Access-Key': currentAccessKey // Include the access key
+        'X-Access-Key': currentAccessKey
       },
       body: JSON.stringify({ model: selectedModel, messages: apiMessages })
     });
 
     if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: { message: `API request failed with status ${response.status}. No error details available.` }}));
+        const errorData = await response.json().catch(() => ({ error: { message: `API request failed with status ${response.status}.` }}));
         let errorMsg = errorData.error?.message || `Error ${response.status}`;
-        if (response.status === 401) { // Unauthorized (likely bad access key)
+        if (response.status === 401) {
             errorMsg = '访问密钥无效或已过期。请在左侧面板更新密钥。';
             if (accessKeyStatus) {
                 accessKeyStatus.textContent = '密钥无效！';
                 accessKeyStatus.style.color = 'red';
             }
-            localStorage.removeItem('chat-access-key'); // Optionally clear bad key
-            currentAccessKey = ''; // Clear runtime key
+            localStorage.removeItem('chat-access-key');
+            currentAccessKey = '';
         }
         console.error('API Error:', errorData);
         assistantMsgElement.textContent = `[请求错误: ${errorMsg}]`;
         assistantMsgElement.classList.add('error-message');
-        messages.push({ role: 'assistant', content: `[请求错误: ${errorMsg}]`}); // Save error to history
-        // No saveHistory() here, let it be saved on next successful message or action
-        // updateHistoryList(); // Reflect error in history list titles if needed
-        return; // Stop further processing for this message
+        messages.push({ role: 'assistant', content: `[请求错误: ${errorMsg}]`});
+        return;
     }
-    // If request was okay, update status briefly
     if (accessKeyStatus) {
         accessKeyStatus.textContent = '密钥有效。';
         accessKeyStatus.style.color = 'green';
-        setTimeout(() => updateAccessKeyStatus(), 2000); // Revert to normal status message
+        setTimeout(() => updateAccessKeyStatus(), 2000);
     }
 
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
     let buffer = '';
-    assistantMsgElement.textContent = ''; // Clear "..." placeholder
+    assistantMsgElement.textContent = '';
 
     while (true) {
       const { value, done } = await reader.read();
       if (done) break;
-
       buffer += decoder.decode(value, { stream: true });
-      
       let eolIndex;
       while ((eolIndex = buffer.indexOf('\n')) >= 0) {
         const line = buffer.substring(0, eolIndex).trim();
         buffer = buffer.substring(eolIndex + 1);
-
         if (line.startsWith('data: ')) {
           const jsonData = line.substring(6);
-          if (jsonData.trim() === '[DONE]') {
-            // Stream finished by [DONE] signal
-          } else {
+          if (jsonData.trim() === '[DONE]') { /* Done */ }
+          else {
             try {
               const chunk = JSON.parse(jsonData);
-              if (chunk.choices && chunk.choices[0].delta && chunk.choices[0].delta.content) {
+              if (chunk.choices?.[0]?.delta?.content) {
                 const contentChunk = chunk.choices[0].delta.content;
                 fullAssistantReply += contentChunk;
-                assistantMsgElement.textContent = fullAssistantReply; // Render progressively
+                assistantMsgElement.textContent = fullAssistantReply;
                 chatBox.scrollTop = chatBox.scrollHeight;
               }
-            } catch (e) {
-              console.warn('Failed to parse JSON chunk:', jsonData, e);
-            }
+            } catch (e) { console.warn('Failed to parse JSON chunk:', jsonData, e); }
           }
         }
       }
     }
-    // Process any remaining part of the buffer if stream ends without a final newline
     if (buffer.trim().startsWith('data: ')) {
         const jsonData = buffer.trim().substring(6);
         if (jsonData !== '[DONE]') {
             try {
                 const chunk = JSON.parse(jsonData);
-                 if (chunk.choices && chunk.choices[0].delta && chunk.choices[0].delta.content) {
+                 if (chunk.choices?.[0]?.delta?.content) {
                     fullAssistantReply += chunk.choices[0].delta.content;
                     assistantMsgElement.textContent = fullAssistantReply;
                 }
-            } catch (e) { /* ignore parse error on potentially incomplete final chunk */ }
+            } catch (e) { /* ignore */ }
         }
     }
-
     if (fullAssistantReply.trim() === '' && !assistantMsgElement.textContent.includes("错误")) {
         fullAssistantReply = '[无回复内容]';
         assistantMsgElement.textContent = fullAssistantReply;
     }
-    
     messages.push({ role: 'assistant', content: fullAssistantReply });
     saveHistory();
-    updateHistoryList(); // Update titles etc.
-
+    updateHistoryList();
   } catch (err) {
     console.error('Fetch/Stream processing error:', err);
     assistantMsgElement.textContent = '[连接或处理错误，请检查控制台]';
     assistantMsgElement.classList.add('error-message');
     messages.push({ role: 'assistant', content: '[连接或处理错误]' });
-    saveHistory(); // Save error to history
+    saveHistory();
     updateHistoryList();
   } finally {
-    if (sendButton) sendButton.disabled = false; // Re-enable send button
+    if (sendButton) sendButton.disabled = false;
   }
 }
 
 // --- Initialization ---
 function initializeApp() {
-    // Access Key
     updateAccessKeyStatus();
     if (saveAccessKeyBtn) {
         saveAccessKeyBtn.addEventListener('click', saveAccessKey);
@@ -423,35 +406,35 @@ function initializeApp() {
         });
     }
 
-    // Models
-    loadModels(); // Async, will populate select when done
+    loadModels();
 
-    // Dark Mode
     if (localStorage.getItem('dark-mode') === 'on') {
         document.body.classList.add('dark');
     }
 
-    // Chat History & Initial Load
     const sortedChatIds = Object.keys(allChats).sort((a, b) => parseInt(b.split('-')[1]) - parseInt(a.split('-')[1]));
     if (sortedChatIds.length > 0) {
-        loadChat(sortedChatIds[0]); // Load newest chat
+        loadChat(sortedChatIds[0]);
     } else {
-        createNewChat(); // Or create a new one if no history
+        createNewChat();
     }
 
-    // Event Listeners for UI elements
     if (toggleHistoryBtn) {
         toggleHistoryBtn.addEventListener('click', toggleHistoryPanel);
     }
-    document.addEventListener('click', function (e) { // Auto close menu on mobile
-      if (window.innerWidth <= 768 && historyPanel && toggleHistoryBtn) { 
-        if (historyPanel.classList.contains('show') && !historyPanel.contains(e.target) && !toggleHistoryBtn.contains(e.target)) {
+    
+    document.addEventListener('click', function (e) {
+      if (window.innerWidth <= 768 && historyPanel && historyPanel.classList.contains('show')) {
+        const isToggleButton = toggleHistoryBtn && toggleHistoryBtn.contains(e.target);
+        const isInsidePanel = historyPanel.contains(e.target);
+        if (!isToggleButton && !isInsidePanel) {
           toggleHistoryPanel();
         }
       }
     });
+    
     window.addEventListener('resize', initialHistoryPanelState);
-    initialHistoryPanelState(); // Call on load
+    initialHistoryPanelState(); // Call on load to set initial button visibility and panel state
 
     if (inputBox) {
         inputBox.addEventListener('keydown', function (e) {
@@ -470,12 +453,10 @@ function initializeApp() {
         searchBox.addEventListener('input', searchMessages);
     }
 
-    // History Panel Action Buttons
     if (createNewChatBtn) createNewChatBtn.addEventListener('click', createNewChat);
     if (exportCurrentChatBtn) exportCurrentChatBtn.addEventListener('click', exportCurrentChat);
     if (toggleDarkModeBtn) toggleDarkModeBtn.addEventListener('click', toggleDarkMode);
     if (clearAllChatsBtn) clearAllChatsBtn.addEventListener('click', clearAllChats);
 }
 
-// Start the application
 document.addEventListener('DOMContentLoaded', initializeApp);
