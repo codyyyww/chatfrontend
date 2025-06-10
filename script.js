@@ -27,6 +27,7 @@ let messages = [];
 let allChats = JSON.parse(localStorage.getItem('chat-history')) || {};
 let currentChatId = null;
 let currentAccessKey = localStorage.getItem('chat-access-key') || '';
+let lastWindowWidth = window.innerWidth; // Track width changes for resize logic
 
 // --- Access Key Management ---
 function updateAccessKeyStatus() {
@@ -65,22 +66,33 @@ function toggleHistoryPanel() {
     }
 }
 
-function initialHistoryPanelState() {
+function handleResizeLayout() {
     if (!historyPanel || !toggleHistoryBtn) return;
-    if (window.innerWidth > 768) { // Desktop
-        if (!historyPanel.classList.contains('show')) {
-            historyPanel.classList.add('show'); // Show panel on desktop
-            toggleHistoryBtn.setAttribute('aria-expanded', 'true');
-        }
-        toggleHistoryBtn.style.display = 'none'; // Hide toggle button on desktop
-    } else { // Mobile
-        if (historyPanel.classList.contains('show')) { // If somehow shown by default on mobile, hide it
+
+    const currentWindowWidth = window.innerWidth;
+    const isMobileView = currentWindowWidth <= 768;
+    const wasMobileView = lastWindowWidth <= 768; // Check state *before* this resize
+
+    if (isMobileView) {
+        toggleHistoryBtn.style.display = 'block';
+        // If we just switched from desktop to mobile AND the panel was open (desktop default)
+        if (!wasMobileView && historyPanel.classList.contains('show')) {
             historyPanel.classList.remove('show');
             toggleHistoryBtn.setAttribute('aria-expanded', 'false');
         }
-        toggleHistoryBtn.style.display = 'block'; // Show toggle button on mobile
+        // Otherwise, on mobile, the panel's state (open/closed) is managed by user interaction (toggleHistoryPanel)
+        // and should persist through resizes like keyboard appearing/disappearing,
+        // as long as it stays in mobile view.
+    } else { // Desktop View
+        toggleHistoryBtn.style.display = 'none';
+        if (!historyPanel.classList.contains('show')) {
+            historyPanel.classList.add('show'); // Default to open on desktop
+            toggleHistoryBtn.setAttribute('aria-expanded', 'true');
+        }
     }
+    lastWindowWidth = currentWindowWidth; // Update last width for the next resize event
 }
+
 
 // --- Chat & Message Handling ---
 function appendMessage(role, content) {
@@ -322,7 +334,9 @@ async function sendMessage() {
         assistantMsgElement.textContent = `[请求错误: ${errorMsg}]`;
         assistantMsgElement.classList.add('error-message');
         messages.push({ role: 'assistant', content: `[请求错误: ${errorMsg}]`});
-        return;
+        // Error message is pushed to messages array. It will be saved with next successful history save.
+        // No explicit saveHistory() or updateHistoryList() here to avoid duplicate entries or premature updates.
+        return; 
     }
     if (accessKeyStatus) {
         accessKeyStatus.textContent = '密钥有效。';
@@ -393,6 +407,7 @@ async function sendMessage() {
 
 // --- Initialization ---
 function initializeApp() {
+    // Access Key
     updateAccessKeyStatus();
     if (saveAccessKeyBtn) {
         saveAccessKeyBtn.addEventListener('click', saveAccessKey);
@@ -406,12 +421,15 @@ function initializeApp() {
         });
     }
 
+    // Models
     loadModels();
 
+    // Dark Mode
     if (localStorage.getItem('dark-mode') === 'on') {
         document.body.classList.add('dark');
     }
 
+    // Chat History & Initial Load
     const sortedChatIds = Object.keys(allChats).sort((a, b) => parseInt(b.split('-')[1]) - parseInt(a.split('-')[1]));
     if (sortedChatIds.length > 0) {
         loadChat(sortedChatIds[0]);
@@ -419,10 +437,12 @@ function initializeApp() {
         createNewChat();
     }
 
+    // Event Listeners for UI elements
     if (toggleHistoryBtn) {
         toggleHistoryBtn.addEventListener('click', toggleHistoryPanel);
     }
     
+    // Click outside to close panel on mobile
     document.addEventListener('click', function (e) {
       if (window.innerWidth <= 768 && historyPanel && historyPanel.classList.contains('show')) {
         const isToggleButton = toggleHistoryBtn && toggleHistoryBtn.contains(e.target);
@@ -433,8 +453,9 @@ function initializeApp() {
       }
     });
     
-    window.addEventListener('resize', initialHistoryPanelState);
-    initialHistoryPanelState(); // Call on load to set initial button visibility and panel state
+    // Layout handling for resize and initial load
+    window.addEventListener('resize', handleResizeLayout);
+    handleResizeLayout(); // Call on load
 
     if (inputBox) {
         inputBox.addEventListener('keydown', function (e) {
@@ -453,6 +474,7 @@ function initializeApp() {
         searchBox.addEventListener('input', searchMessages);
     }
 
+    // History Panel Action Buttons
     if (createNewChatBtn) createNewChatBtn.addEventListener('click', createNewChat);
     if (exportCurrentChatBtn) exportCurrentChatBtn.addEventListener('click', exportCurrentChat);
     if (toggleDarkModeBtn) toggleDarkModeBtn.addEventListener('click', toggleDarkMode);
