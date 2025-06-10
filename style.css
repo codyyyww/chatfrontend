@@ -56,7 +56,7 @@ body {
 #history-panel .panel-header {
   padding: 15px 20px;
   border-bottom: 1px solid var(--border-light);
-  background-color: var(--panel-bg-light);
+  background-color: var(--panel-bg-light); /* Slightly different or same as panel bg */
 }
 #history-panel .panel-header h3 {
   margin: 0;
@@ -104,7 +104,7 @@ body.dark .panel-label {
 
 #history-list button:hover,
 .history-action-btn:hover {
-  background: #e9ecef;
+  background: #e9ecef; /* Specific hover, not var for simplicity */
   border-color: #adb5bd;
 }
 
@@ -127,25 +127,26 @@ body.dark .panel-label {
   padding-left: 9px; /* Adjusted for border */
 }
 
-#access-key-input-container { /* Renamed from inline style div */
-    display: flex;
-    gap: 5px;
-    margin-bottom: 5px;
+/* Styles for access key input area - replacing inline styles */
+#access-key-input-container { /* This ID would be on the div wrapping input and button if you add it */
+    display: flex; /* Kept from your HTML's inline style */
+    gap: 5px; /* Kept from your HTML's inline style */
+    margin-bottom: 5px; /* Kept from your HTML's inline style */
 }
 #access-key-input {
-    flex-grow: 1;
+    flex-grow: 1; /* Kept from your HTML's inline style */
     min-width: 0; /* Important for flex items */
     border: 1px solid var(--border-light);
     border-radius: 6px;
-    padding: 9px 12px;
+    padding: 9px 12px; /* Consistent padding */
     font-size: 14px;
     background-color: var(--input-bg-light);
     color: var(--text-color-light);
 }
 #save-access-key-btn {
-    padding: 0 10px;
-    font-size: 14px;
-    flex-shrink: 0;
+    padding: 0 10px; /* Kept from your HTML's inline style */
+    font-size: 14px; /* Kept from your HTML's inline style */
+    flex-shrink: 0; /* Kept from your HTML's inline style */
     border: 1px solid var(--border-light);
     border-radius: 6px;
     background: var(--button-bg-light);
@@ -157,9 +158,9 @@ body.dark .panel-label {
     border-color: #adb5bd;
 }
 #access-key-status {
-    display: block;
-    font-size: 12px;
-    margin-bottom: 15px;
+    display: block; /* Kept from your HTML's inline style */
+    font-size: 12px; /* Kept from your HTML's inline style */
+    margin-bottom: 15px; /* Kept from your HTML's inline style */
     min-height: 1.2em; /* To prevent layout shift */
     transition: color 0.3s ease;
 }
@@ -191,7 +192,7 @@ body.dark .panel-label {
   flex: 1;
   padding: 20px;
   overflow-y: auto;
-  background: var(--bg-light);
+  background: var(--bg-light); /* Same as body bg or slightly different */
 }
 
 /* 聊天消息样式 */
@@ -204,22 +205,22 @@ body.dark .panel-label {
   max-width: 80%;
   box-shadow: 0 1px 3px rgba(0,0,0,0.07);
   line-height: 1.5;
-  display: flex;
-  flex-direction: column;
+  display: flex; /* To use align-self */
+  flex-direction: column; /* Ensure content flows normally */
 }
 
 .user {
   background-color: var(--user-msg-bg-light);
   color: #ffffff;
   align-self: flex-end;
-  margin-left: auto;
+  margin-left: auto; /* Pushes to the right */
 }
 
 .assistant {
   background-color: var(--assistant-msg-bg-light);
   color: var(--text-color-light);
   align-self: flex-start;
-  margin-right: auto;
+  margin-right: auto; /* Pushes to the left */
 }
 .message.error-message {
     background-color: var(--error-bg-light);
@@ -235,7 +236,7 @@ body.dark .panel-label {
   align-items: flex-end;
   padding: 15px 20px;
   gap: 10px;
-  background: var(--panel-bg-light); /* Matched to history panel for consistency */
+  background: var(--panel-bg-light); /* Often white or slightly off-white */
   box-shadow: 0 -2px 6px rgba(0,0,0,0.05);
   border-top: 1px solid var(--border-light);
 }
@@ -257,9 +258,9 @@ textarea#user-input {
 
 #input-container button#send-button {
   font-size: 16px;
-  padding: 0 20px;
-  height: 46px;
-  line-height: 44px; /* Vertically center text */
+  padding: 0 20px; /* Adjust padding for height */
+  height: 46px; /* Fixed height */
+  line-height: 44px; /* Align text vertically */
   border-radius: 6px;
   border: 1px solid var(--primary-color);
   background: var(--primary-color);
@@ -290,7 +291,7 @@ body.dark #history-panel {
   border-right: 1px solid var(--border-dark);
 }
 body.dark #history-panel .panel-header {
-  background-color: var(--panel-bg-dark);
+  background-color: var(--panel-bg-dark); /* Darker or same as panel */
   border-bottom: 1px solid var(--border-dark);
 }
 
@@ -302,7 +303,7 @@ body.dark .history-action-btn {
 }
 body.dark #history-list button:hover,
 body.dark .history-action-btn:hover {
-  background: #454545;
+  background: #454545; /* Specific hover */
   border-color: #606060;
 }
 body.dark .history-action-btn.danger {
@@ -317,7 +318,7 @@ body.dark .history-action-btn.danger:hover {
 
 body.dark #history-list button.active-chat {
   background-color: var(--user-msg-bg-dark);
-  border-left-color: var(--primary-color);
+  border-left-color: var(--primary-color); /* Bright border for contrast */
   color: white;
 }
 
@@ -341,12 +342,12 @@ body.dark #history-panel select {
 }
 body.dark #search-box::placeholder,
 body.dark textarea#user-input::placeholder,
-body.dark #access-key-input::placeholder {
+body.dark #access-key-input::placeholder { /* Added placeholder for access key input in dark mode */
     color: #888;
 }
 
 body.dark #chat {
-  background: var(--bg-dark);
+  background: var(--bg-dark); /* Or slightly different like #212121 */
 }
 
 body.dark .user {
@@ -365,7 +366,7 @@ body.dark .message.error-message {
 
 
 body.dark #input-container {
-  background: var(--panel-bg-dark);
+  background: var(--panel-bg-dark); /* Usually same as history panel bg */
   border-top: 1px solid var(--border-dark);
 }
 
@@ -376,7 +377,7 @@ body.dark textarea#user-input {
 }
 
 body.dark #input-container button#send-button {
-  background: var(--primary-color);
+  background: var(--primary-color); /* Keep primary color for action */
   border-color: var(--primary-color);
 }
 body.dark #input-container button#send-button:hover {
@@ -391,7 +392,7 @@ body.dark #input-container button#send-button:disabled {
 
 /* Mobile Toggle Button for History Panel */
 #toggle-history-btn {
-  display: none;
+  display: none; /* Hidden by default, shown by JS based on screen width */
   position: fixed;
   top: 10px;
   left: 10px;
@@ -401,7 +402,7 @@ body.dark #input-container button#send-button:disabled {
   border: 1px solid var(--border-light);
   border-radius: 6px;
   padding: 8px 12px;
-  font-size: 20px;
+  font-size: 20px; /* Larger icon */
   line-height: 1;
   cursor: pointer;
   box-shadow: 0 2px 5px rgba(0,0,0,0.1);
@@ -415,9 +416,7 @@ body.dark #toggle-history-btn {
 
 /* Responsive Design */
 @media (max-width: 768px) {
-  #toggle-history-btn {
-    display: block;
-  }
+  /* #toggle-history-btn display is handled by initialHistoryPanelState in JS */
 
   #history-panel {
     position: fixed;
@@ -439,20 +438,26 @@ body.dark #toggle-history-btn {
     transform: translateX(0);
   }
   
+  /* Add padding to panel header when toggle button is potentially visible on mobile */
+  #history-panel .panel-header {
+    padding-top: 50px; /* Adjust this value based on toggle button height + desired spacing */
+  }
+
+
   #main {
     /* No adjustments needed here */
   }
 
   #input-container {
-    padding: 10px;
+    padding: 10px; /* Tighter padding on mobile */
   }
   textarea#user-input {
-    min-height: 44px;
+    min-height: 44px; /* Slightly smaller min height */
     max-height: 150px;
   }
   #input-container button#send-button {
     height: 44px;
-    line-height: 42px;
+    line-height: 42px; /* Adjust line height for vertical centering */
     padding: 0 15px;
   }
 }
