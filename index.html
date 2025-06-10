@@ -3,57 +3,52 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Chat with History</title>
+  <title>智能对话助手</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 <div id="layout">
-  <div id="menu-bubble">
-    <button id="toggle-history" onclick="toggleHistory()">📂</button>
-    <div id="history" class="bubble">
-      <label style="font-size: 14px;">选择模型：</label>
-      <select id="model-select" style="width: 100%; margin-bottom: 10px;"></select>
-      <button onclick="createNewChat()">+ 新对话</button>
-      <button onclick="clearAllChats()">🗑 清空历史</button>
-      <button onclick="exportCurrentChat()">📁 导出当前对话</button>
-      <button onclick="toggleDarkMode()">🌓 夜间模式</button>
-      <input type="text" id="search-box" placeholder="搜索消息..." oninput="searchMessages()" style="margin-top: 10px; width: 100%; padding: 5px; font-size: 14px;" />
-      <div id="history-list"></div>
+  <button id="toggle-history-btn" aria-label="切换菜单面板" aria-expanded="false">📂</button>
+
+  <aside id="history-panel" aria-labelledby="history-panel-header">
+    <div class="panel-header">
+      <h3 id="history-panel-header">设置与历史</h3>
     </div>
-  </div>
-  <div id="main">
-    <div id="chat" style="margin-top: 60px;"></div>
+    <div class="panel-content">
+      <label for="access-key-input" class="panel-label">访问密钥:</label>
+      <div style="display: flex; gap: 5px; margin-bottom: 5px;">
+        <input type="password" id="access-key-input" placeholder="输入密钥..." style="flex-grow: 1; min-width: 0;" aria-label="访问密钥">
+        <button id="save-access-key-btn" title="保存密钥" style="padding: 0 10px; font-size: 14px; flex-shrink: 0;">保存</button>
+      </div>
+      <small id="access-key-status" style="display: block; font-size: 12px; margin-bottom: 15px; min-height: 1.2em;"></small>
+
+      <label for="model-select" class="panel-label">选择模型：</label>
+      <select id="model-select" aria-label="选择对话模型" style="width: 100%; margin-bottom: 15px;"></select>
+      
+      <button id="create-new-chat-btn" class="history-action-btn" title="开始一个新的对话">+ 新对话</button>
+      <button id="export-current-chat-btn" class="history-action-btn" title="将当前对话导出为文本文件">📁 导出当前</button>
+      <button id="toggle-dark-mode-btn" class="history-action-btn" title="切换亮色/暗色主题">🌓 主题切换</button>
+      <button id="clear-all-chats-btn" class="history-action-btn danger" title="清空所有对话历史记录">🗑 清空全部</button>
+      
+      <label for="search-box" class="panel-label" style="margin-top: 15px;">搜索当前对话：</label>
+      <input type="text" id="search-box" placeholder="输入关键词..." aria-label="在当前对话中搜索消息" style="width: 100%;" />
+      
+      <h4 class="panel-label" style="margin-top: 20px; margin-bottom: 10px;">对话历史</h4>
+      <div id="history-list" aria-live="polite"></div>
+    </div>
+  </aside>
+
+  <main id="main">
+    <div id="chat" aria-live="polite" aria-atomic="false">
+      <!-- Chat messages will appear here -->
+    </div>
     <div id="input-container">
-  <textarea id="user-input" rows="2" placeholder="输入你的问题..."></textarea>
-  
-</div>
+      <textarea id="user-input" rows="3" placeholder="输入你的问题... (Shift+Enter 换行)" aria-label="用户输入框"></textarea>
+      <button id="send-button" title="发送消息">发送</button>
     </div>
-  </div>
+  </main>
 </div>
 
-<script>
-function toggleHistory() {
-  document.getElementById('history').classList.toggle('show');
-}
-
-// 自动关闭菜单气泡（点击外部）
-document.addEventListener('click', function (e) {
-  const history = document.getElementById('history');
-  const toggle = document.getElementById('toggle-history');
-  if (!history.contains(e.target) && !toggle.contains(e.target)) {
-    history.classList.remove('show');
-  }
-});
-</script>
-<script>
-document.getElementById('user-input').addEventListener('keydown', function (e) {
-  if (e.key === 'Enter' && !e.shiftKey) {
-    e.preventDefault();
-    sendMessage();
-  }
-});
-
-</script>
 <script src="script.js"></script>
 </body>
 </html>
