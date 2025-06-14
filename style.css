@@ -127,45 +127,6 @@ body.dark .panel-label {
   padding-left: 9px; /* Adjusted for border */
 }
 
-/* Styles for access key input area - replacing inline styles */
-#access-key-input-container { /* This ID would be on the div wrapping input and button if you add it */
-    display: flex; /* Kept from your HTML's inline style */
-    gap: 5px; /* Kept from your HTML's inline style */
-    margin-bottom: 5px; /* Kept from your HTML's inline style */
-}
-#access-key-input {
-    flex-grow: 1; /* Kept from your HTML's inline style */
-    min-width: 0; /* Important for flex items */
-    border: 1px solid var(--border-light);
-    border-radius: 6px;
-    padding: 9px 12px; /* Consistent padding */
-    font-size: 14px;
-    background-color: var(--input-bg-light);
-    color: var(--text-color-light);
-}
-#save-access-key-btn {
-    padding: 0 10px; /* Kept from your HTML's inline style */
-    font-size: 14px; /* Kept from your HTML's inline style */
-    flex-shrink: 0; /* Kept from your HTML's inline style */
-    border: 1px solid var(--border-light);
-    border-radius: 6px;
-    background: var(--button-bg-light);
-    color: var(--text-color-light);
-    cursor: pointer;
-}
-#save-access-key-btn:hover {
-    background: #e9ecef;
-    border-color: #adb5bd;
-}
-#access-key-status {
-    display: block; /* Kept from your HTML's inline style */
-    font-size: 12px; /* Kept from your HTML's inline style */
-    margin-bottom: 15px; /* Kept from your HTML's inline style */
-    min-height: 1.2em; /* To prevent layout shift */
-    transition: color 0.3s ease;
-}
-
-
 #search-box,
 #history-panel select {
   border: 1px solid var(--border-light);
@@ -322,18 +283,6 @@ body.dark #history-list button.active-chat {
   color: white;
 }
 
-body.dark #access-key-input,
-body.dark #save-access-key-btn {
-    background: var(--input-bg-dark);
-    color: var(--text-color-dark);
-    border: 1px solid var(--border-dark);
-}
-body.dark #save-access-key-btn:hover {
-    background: #454545;
-    border-color: #606060;
-}
-
-
 body.dark #search-box,
 body.dark #history-panel select {
   background: var(--input-bg-dark);
@@ -341,8 +290,7 @@ body.dark #history-panel select {
   border: 1px solid var(--border-dark);
 }
 body.dark #search-box::placeholder,
-body.dark textarea#user-input::placeholder,
-body.dark #access-key-input::placeholder { /* Added placeholder for access key input in dark mode */
+body.dark textarea#user-input::placeholder {
     color: #888;
 }
 
