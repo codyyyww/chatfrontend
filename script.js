@@ -20,7 +20,7 @@ const clearAllChatsBtn = document.getElementById('clear-all-chats-btn');
 
 
 // API URL
-const apiUrl = '/api/chat'; // Assuming proxy is on the same domain
+const apiUrl = 'https://api-proxy-pbgb.onrender.com'; // Assuming proxy is on the same domain
 
 // State Variables
 let messages = [];
