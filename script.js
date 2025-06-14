@@ -9,10 +9,6 @@ const historyPanel = document.getElementById('history-panel');
 const toggleHistoryBtn = document.getElementById('toggle-history-btn');
 const historyList = document.getElementById('history-list');
 
-const accessKeyInput = document.getElementById('access-key-input');
-const saveAccessKeyBtn = document.getElementById('save-access-key-btn');
-const accessKeyStatus = document.getElementById('access-key-status');
-
 const createNewChatBtn = document.getElementById('create-new-chat-btn');
 const exportCurrentChatBtn = document.getElementById('export-current-chat-btn');
 const toggleDarkModeBtn = document.getElementById('toggle-dark-mode-btn');
@@ -26,37 +22,7 @@ const apiUrl = 'https://api-proxy-pbgb.onrender.com'; // Assuming proxy is on th
 let messages = [];
 let allChats = JSON.parse(localStorage.getItem('chat-history')) || {};
 let currentChatId = null;
-let currentAccessKey = localStorage.getItem('chat-access-key') || '';
 let lastWindowWidth = window.innerWidth; // Track width changes for resize logic
-
-// --- Access Key Management ---
-function updateAccessKeyStatus() {
-    if (!accessKeyStatus) return;
-    if (currentAccessKey) {
-        accessKeyStatus.textContent = '密钥已设置。';
-        accessKeyStatus.style.color = 'green';
-        if (accessKeyInput) accessKeyInput.value = currentAccessKey;
-    } else {
-        accessKeyStatus.textContent = '未设置访问密钥。聊天功能可能受限。';
-        accessKeyStatus.style.color = 'orange';
-    }
-}
-
-function saveAccessKey() {
-    if (accessKeyInput && accessKeyStatus) {
-        currentAccessKey = accessKeyInput.value.trim();
-        if (currentAccessKey) {
-            localStorage.setItem('chat-access-key', currentAccessKey);
-            accessKeyStatus.textContent = '密钥已保存!';
-            accessKeyStatus.style.color = 'green';
-        } else {
-            localStorage.removeItem('chat-access-key');
-            accessKeyStatus.textContent = '密钥已清除。';
-            accessKeyStatus.style.color = 'orange';
-        }
-        setTimeout(() => updateAccessKeyStatus(), 1500);
-    }
-}
 
 // --- UI & History Panel ---
 function toggleHistoryPanel() {
@@ -271,16 +237,6 @@ async function loadModels() {
 }
 
 async function sendMessage() {
-  if (!currentAccessKey) {
-    alert('请先在左侧面板设置并保存访问密钥。');
-    if (accessKeyStatus) {
-        accessKeyStatus.textContent = '需要访问密钥才能发送消息！';
-        accessKeyStatus.style.color = 'red';
-    }
-    if(accessKeyInput) accessKeyInput.focus();
-    return;
-  }
-
   const content = inputBox.value.trim();
   const selectedModel = modelSelect.value;
   if (!content) {
@@ -312,8 +268,7 @@ async function sendMessage() {
     const response = await fetch(apiUrl, {
       method: 'POST',
       headers: { 
-        'Content-Type': 'application/json',
-        'X-Access-Key': currentAccessKey
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({ model: selectedModel, messages: apiMessages })
     });
@@ -321,15 +276,6 @@ async function sendMessage() {
     if (!response.ok) {
         const errorData = await response.json().catch(() => ({ error: { message: `API request failed with status ${response.status}.` }}));
         let errorMsg = errorData.error?.message || `Error ${response.status}`;
-        if (response.status === 401) {
-            errorMsg = '访问密钥无效或已过期。请在左侧面板更新密钥。';
-            if (accessKeyStatus) {
-                accessKeyStatus.textContent = '密钥无效！';
-                accessKeyStatus.style.color = 'red';
-            }
-            localStorage.removeItem('chat-access-key');
-            currentAccessKey = '';
-        }
         console.error('API Error:', errorData);
         assistantMsgElement.textContent = `[请求错误: ${errorMsg}]`;
         assistantMsgElement.classList.add('error-message');
@@ -338,12 +284,7 @@ async function sendMessage() {
         // No explicit saveHistory() or updateHistoryList() here to avoid duplicate entries or premature updates.
         return; 
     }
-    if (accessKeyStatus) {
-        accessKeyStatus.textContent = '密钥有效。';
-        accessKeyStatus.style.color = 'green';
-        setTimeout(() => updateAccessKeyStatus(), 2000);
-    }
-
+    
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
     let buffer = '';
@@ -407,20 +348,6 @@ async function sendMessage() {
 
 // --- Initialization ---
 function initializeApp() {
-    // Access Key
-    updateAccessKeyStatus();
-    if (saveAccessKeyBtn) {
-        saveAccessKeyBtn.addEventListener('click', saveAccessKey);
-    }
-    if (accessKeyInput) {
-        accessKeyInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                saveAccessKey();
-            }
-        });
-    }
-
     // Models
     loadModels();
 
