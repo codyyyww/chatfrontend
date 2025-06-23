@@ -327,10 +327,10 @@ async function sendMessage() {
             } catch (e) { /* ignore */ }
         }
     }
-    if (fullAssistantReply.trim() === '' && !assistantMsgElement.textContent.includes("错误")) {
-        fullAssistantReply = '[无回复内容]';
-        assistantMsgElement.textContent = fullAssistantReply;
-    }
+// if (fullAssistantReply.trim() === '' && !assistantMsgElement.textContent.includes("错误")) {
+//     fullAssistantReply = '[无回复内容]';
+//     assistantMsgElement.textContent = fullAssistantReply;
+// }
     messages.push({ role: 'assistant', content: fullAssistantReply });
     saveHistory();
     updateHistoryList();
