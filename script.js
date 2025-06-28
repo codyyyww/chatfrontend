@@ -72,7 +72,7 @@ function appendMessage(role, content) {
 
 function saveHistory() {
   if (currentChatId) {
-    allChats[currentChatId] = [...messages];
+    // Just update localStorage, don't overwrite the reference!
     localStorage.setItem('chat-history', JSON.stringify(allChats));
   }
 }
@@ -80,7 +80,11 @@ function saveHistory() {
 function createNewChat() {
   const newId = 'chat-' + Date.now();
   allChats[newId] = [];
-  loadChat(newId);
+  currentChatId = newId;
+  messages = allChats[newId];
+  chatBox.innerHTML = '';
+  updateHistoryList();
+  saveHistory();
 }
 
 function updateHistoryList() {
@@ -119,7 +123,7 @@ function loadChat(id) {
       allChats[id] = [];
   }
   currentChatId = id;
-  messages = [...allChats[id]];
+  messages = allChats[id]; // <-- Fix: use direct reference, not a copy!
   chatBox.innerHTML = '';
   messages.forEach(m => appendMessage(m.role, m.content));
   
@@ -191,7 +195,7 @@ async function loadModels() {
     { id: 'google/gemma-7b-it', name: 'Google Gemma 7B IT' },
     { id: 'openai/gpt-3.5-turbo', name: 'OpenAI GPT-3.5 Turbo' },
   ];
-  const preferredModelId = 'deepseek/deepseek-chat';
+  const preferredModelId = 'deepseek/deepseek-r1:free';
   modelSelect.innerHTML = ''; 
 
   try {
@@ -250,8 +254,15 @@ async function sendMessage() {
     return;
   }
 
-  if (!currentChatId) {
+  // Ensure chat is initialized before sending
+  if (!currentChatId || !allChats[currentChatId] || !messages) {
     createNewChat();
+  }
+
+  // Double-check after creation
+  if (!currentChatId || !allChats[currentChatId] || !messages) {
+    alert("对话初始化失败，请刷新页面重试。");
+    return;
   }
 
   appendMessage('user', content);
