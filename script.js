@@ -236,6 +236,7 @@ async function loadModels() {
   }
 }
 
+// --- Chat Message Sending ---
 async function sendMessage() {
   const content = inputBox.value.trim();
   const selectedModel = modelSelect.value;
@@ -280,57 +281,14 @@ async function sendMessage() {
         assistantMsgElement.textContent = `[请求错误: ${errorMsg}]`;
         assistantMsgElement.classList.add('error-message');
         messages.push({ role: 'assistant', content: `[请求错误: ${errorMsg}]`});
-        // Error message is pushed to messages array. It will be saved with next successful history save.
-        // No explicit saveHistory() or updateHistoryList() here to avoid duplicate entries or premature updates.
         return; 
     }
-    
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder();
-    let buffer = '';
-    assistantMsgElement.textContent = '';
 
-    while (true) {
-      const { value, done } = await reader.read();
-      if (done) break;
-      buffer += decoder.decode(value, { stream: true });
-      let eolIndex;
-      while ((eolIndex = buffer.indexOf('\n')) >= 0) {
-        const line = buffer.substring(0, eolIndex).trim();
-        buffer = buffer.substring(eolIndex + 1);
-        if (line.startsWith('data: ')) {
-          const jsonData = line.substring(6);
-          if (jsonData.trim() === '[DONE]') { /* Done */ }
-          else {
-            try {
-              const chunk = JSON.parse(jsonData);
-              if (chunk.choices?.[0]?.delta?.content) {
-                const contentChunk = chunk.choices[0].delta.content;
-                fullAssistantReply += contentChunk;
-                assistantMsgElement.textContent = fullAssistantReply;
-                chatBox.scrollTop = chatBox.scrollHeight;
-              }
-            } catch (e) { console.warn('Failed to parse JSON chunk:', jsonData, e); }
-          }
-        }
-      }
-    }
-    if (buffer.trim().startsWith('data: ')) {
-        const jsonData = buffer.trim().substring(6);
-        if (jsonData !== '[DONE]') {
-            try {
-                const chunk = JSON.parse(jsonData);
-                 if (chunk.choices?.[0]?.delta?.content) {
-                    fullAssistantReply += chunk.choices[0].delta.content;
-                    assistantMsgElement.textContent = fullAssistantReply;
-                }
-            } catch (e) { /* ignore */ }
-        }
-    }
-// if (fullAssistantReply.trim() === '' && !assistantMsgElement.textContent.includes("错误")) {
-//     fullAssistantReply = '[无回复内容]';
-//     assistantMsgElement.textContent = fullAssistantReply;
-// }
+    // Only handle non-streaming (full JSON) response
+    const data = await response.json();
+    fullAssistantReply = data.choices?.[0]?.message?.content || '[无回复内容]';
+    assistantMsgElement.textContent = fullAssistantReply;
+
     messages.push({ role: 'assistant', content: fullAssistantReply });
     saveHistory();
     updateHistoryList();
