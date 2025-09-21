@@ -195,7 +195,8 @@ async function loadModels() {
     { id: 'google/gemma-7b-it', name: 'Google Gemma 7B IT' },
     { id: 'openai/gpt-3.5-turbo', name: 'OpenAI GPT-3.5 Turbo' },
   ];
-  const preferredModelId = 'deepseek/deepseek-r1:free';
+  //const preferredModelId = 'deepseek/deepseek-r1:free';
+  const preferredModelId = 'deepseek/deepseek-chat';
   modelSelect.innerHTML = ''; 
 
   try {
@@ -240,10 +241,72 @@ async function loadModels() {
   }
 }
 
+// --- Add Company Select Menu above model select ---
+const companySelect = document.createElement('select');
+companySelect.id = 'company-select';
+companySelect.style.width = '100%';
+companySelect.style.marginBottom = '10px';
+
+const companyOptions = [
+  { value: 'openrouter', label: 'OpenRouter' },
+  { value: 'google', label: 'Google Gemini' }
+];
+companyOptions.forEach(opt => {
+  const option = document.createElement('option');
+  option.value = opt.value;
+  option.textContent = opt.label;
+  companySelect.appendChild(option);
+});
+
+// Insert above model select in the panel
+document.addEventListener('DOMContentLoaded', () => {
+  const modelLabel = document.querySelector('label[for="model-select"]');
+  if (modelLabel && modelLabel.parentNode) {
+    modelLabel.parentNode.insertBefore(companySelect, modelLabel);
+  }
+});
+
+// --- Gemini models data ---
+const geminiModels = [
+  { id: 'gemini-2.5-pro', name: 'Gemini 2.5 Pro' },
+  { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash' },
+  { id: 'gemini-2.5-flash-lite', name: 'Gemini 2.5 Flash-Lite' },
+  { id: 'gemini-live-2.5-flash-preview', name: 'Gemini 2.5 Flash Live' },
+  { id: 'gemini-2.5-flash-preview-native-audio-dialog', name: 'Gemini 2.5 Flash Native Audio' },
+  { id: 'gemini-2.5-flash-exp-native-audio-thinking-dialog', name: 'Gemini 2.5 Flash Native Audio (Thinking)' },
+  { id: 'gemini-2.5-flash-image-preview', name: 'Gemini 2.5 Flash Image Preview' },
+  { id: 'gemini-2.5-flash-preview-tts', name: 'Gemini 2.5 Flash Preview TTS' },
+  { id: 'gemini-2.5-pro-preview-tts', name: 'Gemini 2.5 Pro Preview TTS' },
+  { id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash' },
+  { id: 'gemini-2.0-flash-preview-image-generation', name: 'Gemini 2.0 Flash Preview Image Generation' },
+  { id: 'gemini-2.0-flash-lite', name: 'Gemini 2.0 Flash-Lite' },
+  { id: 'gemini-2.0-flash-live-001', name: 'Gemini 2.0 Flash Live' }
+];
+
+// --- Company select logic ---
+companySelect.addEventListener('change', function () {
+  const modelLabel = document.querySelector('label[for="model-select"]');
+  if (companySelect.value === 'google') {
+    if (modelLabel) modelLabel.textContent = 'Gemini 选择模型：';
+    modelSelect.innerHTML = '';
+    geminiModels.forEach(m => {
+      const option = document.createElement('option');
+      option.value = m.id;
+      option.textContent = m.name;
+      modelSelect.appendChild(option);
+    });
+    modelSelect.value = geminiModels[0].id;
+  } else {
+    if (modelLabel) modelLabel.textContent = '选择模型：';
+    loadModels();
+  }
+});
+
 // --- Chat Message Sending ---
 async function sendMessage() {
   const content = inputBox.value.trim();
   const selectedModel = modelSelect.value;
+  const selectedCompany = companySelect.value;
   if (!content) {
       inputBox.focus();
       return;
@@ -282,7 +345,11 @@ async function sendMessage() {
       headers: { 
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ model: selectedModel, messages: apiMessages })
+      body: JSON.stringify({ 
+        model: selectedModel, 
+        messages: apiMessages,
+        company: selectedCompany // <-- Add company info
+      })
     });
 
     if (!response.ok) {
